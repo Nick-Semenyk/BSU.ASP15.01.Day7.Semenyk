@@ -22,7 +22,7 @@ namespace TimerEventConsole
             Console.WriteLine("Started");
             Thread.Sleep(2000);
             Console.WriteLine("2000");
-            Console.WriteLine("Adding avon");
+            Console.WriteLine("Adding oven");
             Oven oven = new Oven();
             oven.RegisterTimer(timer);
             Console.WriteLine("Awaiting timer");
