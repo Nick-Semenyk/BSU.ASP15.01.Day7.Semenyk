@@ -17,11 +17,14 @@ namespace BinarySearch
             public HashCodeMatch(T item)
             {
                 Item = item;
-                HashCode = item.GetHashCode();
+                HashCode = item?.GetHashCode() ?? 0;
             }
 
             public override bool Equals(object obj)
             {
+                
+                if (obj == null && Item == null)
+                    return true;
                 if (obj == null)
                     return false;
                 if (!(obj is T))
@@ -34,6 +37,8 @@ namespace BinarySearch
 
             public bool Equals(HashCodeMatch match)
             {
+                if (Item == null && match.Item == null)
+                    return true;
                 return match.Equals(Item);
             }
         }
@@ -118,11 +123,20 @@ namespace BinarySearch
             int result = -1;
             int minIndex = 0;
             int maxIndex = items.Count;
-            //int halfCount;// = (minIndex + maxIndex)/ 2;
-            int hashCode = item.GetHashCode();
+            int oldhalfCount = int.MaxValue;
+            int hashCode = item?.GetHashCode() ?? 0;
+            if (items.Count == 0)
+            {
+                return result;
+            }
             while (true)
             {
                 int halfCount = (minIndex + maxIndex) / 2;
+                if (halfCount == oldhalfCount)
+                {
+                    return result;
+                }
+                oldhalfCount = halfCount;
                 if (items[halfCount].HashCode < hashCode)
                 {
                     minIndex = halfCount;
@@ -136,7 +150,7 @@ namespace BinarySearch
                     //need to call Equals for each item with same hash code
                     HashCodeMatch searchMatch = items[halfCount];
                     int halfCountOriginal = halfCount;
-                    while(searchMatch.HashCode == hashCode)
+                    while (searchMatch.HashCode == hashCode)
                     {
                         if (searchMatch.Equals(item))
                         {
@@ -165,7 +179,6 @@ namespace BinarySearch
                     return result;
                 }
             }
-            return result;
         }
 
         private void BinarySearch(T item, out int insertIndex)
@@ -175,8 +188,7 @@ namespace BinarySearch
             int minIndex = 0;
             int maxIndex = items.Count;
             int oldhalfCount = int.MaxValue;
-            //int halfCount;// = (minIndex + maxIndex)/ 2;
-            int hashCode = item.GetHashCode();
+            int hashCode = item?.GetHashCode() ?? 0;
             if (items.Count == 0)
             {
                 insertIndex = 0;

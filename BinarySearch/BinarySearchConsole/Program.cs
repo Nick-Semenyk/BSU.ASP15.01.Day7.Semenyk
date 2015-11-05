@@ -26,6 +26,11 @@ namespace BinarySearchConsole
                 book.Length = random.Next();
                 bookBinarySearch.Add(book);
             }
+            while (c.Contains(15))
+            {
+                Console.WriteLine(c.Contains(15));
+                c.Remove(15);
+            }
 
         }
     }
