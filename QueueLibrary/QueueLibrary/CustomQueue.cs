@@ -14,6 +14,8 @@ namespace QueueLibrary
         private int firstElementIndex;
         private int lastElementIndex;
 
+        public int Count { get; private set; }
+
         public CustomQueue(int capacity)
         {
             if (capacity <= 0)
@@ -21,6 +23,7 @@ namespace QueueLibrary
                 throw new ArgumentException("Capacity must be positive number");
             }
             queueElements = new T[capacity];
+            Count = 0;
             this.capacity = capacity;
             firstElementIndex = 0;
             lastElementIndex = 0;
@@ -28,46 +31,41 @@ namespace QueueLibrary
 
         public void Enqueue(T item)
         {
+            if (Count == capacity)
+                throw new InvalidOperationException("Queue is full");
             if (lastElementIndex == capacity)
-            {
-                if (firstElementIndex == 0)
-                {
-                    throw new InvalidOperationException("Queue is full");
-                }
-                else
-                {
-                    RecreateArray();
-                }
-            }
+                lastElementIndex = 0;
             queueElements[lastElementIndex] = item;
             lastElementIndex++;
+            Count++;
         }
 
         public T Dequeue()
         {
-            if (firstElementIndex == lastElementIndex)
-            {
+            if (Count == 0)
                 throw new InvalidOperationException("Queue is empty");
+            if (firstElementIndex == capacity)
+            {
+                firstElementIndex = 0;
             }
             T result = queueElements[firstElementIndex];
             queueElements[firstElementIndex] = default(T);
             firstElementIndex++;
+            Count--;
             return result;
         }
 
         public T Peek()
         {
-            if (firstElementIndex == lastElementIndex)
-            {
+            if (Count == 0)
                 throw new InvalidOperationException("Queue is empty");
-            }
             return queueElements[firstElementIndex];
         }
 
 
         public IEnumerator<T> GetEnumerator()
         {
-            return new QueueEnumerator(queueElements);
+            return new QueueEnumerator(queueElements, firstElementIndex, Count);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -91,21 +89,31 @@ namespace QueueLibrary
         private class QueueEnumerator:IEnumerator<T>
         {
             private int currentIndex;
+            private int remainingCount;
+            private int firstIndex;
+            private int firstCount;
             private T[] queue;
 
             public T Current {
                 get
                 {
-                    if (currentIndex < queue.Count())
+                    if (remainingCount > 0)
+                    {
+                        if (currentIndex == queue.Count())
+                            currentIndex = 0;
                         return queue[currentIndex];
+                    }
                     throw new InvalidOperationException();
                 }
             }
 
-            public QueueEnumerator(T[] array)
+            public QueueEnumerator(T[] array, int firstIndex, int count)
             {
-                currentIndex = -1;
+                this.firstIndex = firstIndex;
+                firstCount = count;
+                currentIndex = firstIndex - 1;
                 queue = array;
+                remainingCount = count + 1;
             }
 
             object IEnumerator.Current
@@ -120,12 +128,14 @@ namespace QueueLibrary
             public bool MoveNext()
             {
                 currentIndex++;
-                return currentIndex < queue.Count();
+                remainingCount--;
+                return remainingCount != 0;
             }
 
             public void Reset()
             {
-                currentIndex = -1;
+                currentIndex = firstIndex - 1;
+                remainingCount = firstCount + 1;
             }
         }
     }
