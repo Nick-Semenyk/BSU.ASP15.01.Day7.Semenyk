@@ -6,14 +6,18 @@ using System.Threading.Tasks;
 
 namespace BinarySearch
 {
-    public static class BinarySearch
+    public static class BinarySearchExtension
     {
-        public static int Search<T>(this ICollection<T> collection, T searchItem, IComparer<T> comparer)
+        public static int BinarySearch<T>(this ICollection<T> collection, T searchItem, IComparer<T> comparer)
         {
-            return Search(collection, searchItem, comparer.Compare);
+            if (collection == null)
+                throw new NullReferenceException();
+            if (comparer == null)
+                throw new ArgumentNullException();
+            return BinarySearch(collection, searchItem, comparer.Compare);
         }
 
-        public static int Search<T>(this ICollection<T> collection, T searchItem, Func<T,T,int> comparer )
+        public static int BinarySearch<T>(this ICollection<T> collection, T searchItem, Func<T,T,int> comparer )
         {
             if (collection == null)
                 throw new NullReferenceException();
@@ -46,6 +50,8 @@ namespace BinarySearch
                         while (comparer(equalItem, searchItem) == 0)
                         {
                             halfCount--;
+                            if (halfCount == -1)
+                                return 0;
                             equalItem = collection.ElementAt(halfCount);
                         }
                         return halfCount + 1;
